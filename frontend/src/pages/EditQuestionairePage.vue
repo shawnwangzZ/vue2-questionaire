@@ -1,16 +1,15 @@
 <template>
   <div class="edit">
     <div class="edit-side">
-      <!-- <b-nav tabs>
-        <b-nav-item href="/add/type">问题控件</b-nav-item>
-        <b-nav-item href="/add/outline">问卷大纲</b-nav-item>
-      </b-nav> -->
-      <el-menu :default-active="$route.path" router mode="horizontal" @select="handleSelect">
-        <el-menu-item index="/edit/type">问题控件</el-menu-item>
-        <el-menu-item index="/edit/outline">问卷大纲</el-menu-item>
-      </el-menu>
+      <div class="side-menu">
+        <ul>
+          <li :class="{active: index===0}" @click="setIndex(0)">问题控件</li>
+          <li :class="{active: index===1}" @click="setIndex(1)">问卷大纲</li>
+        </ul>
+      </div>
       <div class="side-content">
-        <router-view @add-question="handleEmit" :questions="questionaire.questions"></router-view>
+        <question-select v-if="index===0" v-on:add-question="addQuestion($event)"></question-select>
+        <questionaire-outline v-if="index===1" :questions="questionaire.questions"></questionaire-outline>
       </div>
     </div>
     <div class="edit-main">
@@ -19,59 +18,26 @@
   </div>
 </template>
 <script>
+import QuestionSelect from '../components/QuestionSelect'
+import QuestionaireOutline from '../components/QuestionaireOutline'
 import EditQuestionaire from '../components/QuestionaireEdit'
 export default {
   name: 'EditQuestionairePage',
   components: {
+    'question-select': QuestionSelect,
+    'questionaire-outline': QuestionaireOutline,
     'edit-questionaire': EditQuestionaire
   },
   data () {
     return {
-      editable: false,
+      index: 0,
+      editable: true,
       questionaire: {
-        id: 1,
         title: '',
         starter: '',
         ender: '',
-        questions: [
-          {
-            qid: 1,
-            type: 'text',
-            title: '你对Element-UI有什么看法？',
-            answer: ''
-          },
-          {
-            qid: 2,
-            type: 'score',
-            title: '给Element-UI打分，你会打多少分？',
-            answer: 5
-          },
-          {
-            qid: 3,
-            type: 'single-select',
-            title: '你觉得Element-UI最显著的特点是什么？',
-            answer: { key: 0 },
-            options: [
-              { key: 0, value: '方便' },
-              { key: 1, value: '轻量' },
-              { key: 2, value: '美观' }
-            ]
-          },
-          {
-            qid: 4,
-            type: 'multi-select',
-            title: '你觉得Element-UI有哪些有点（多选）？',
-            select: [],
-            options: [
-              { key: 0, value: '方便' },
-              { key: 1, value: '轻量' },
-              { key: 2, value: '美观' },
-              { key: 3, value: '易用' }
-            ]
-          }
-        ]
-      },
-      questionId: 0
+        questions: []
+      }
     }
   },
   methods: {
@@ -80,10 +46,16 @@ export default {
     },
     handleEmit () {
       console.log(...arguments)
+    },
+    setIndex (index) {
+      this.index = index
+    },
+    addQuestion ($event) {
+      // console.log($event)
+      this.$message({
+        message: '添加' + $event + '类型的问题'
+      })
     }
-  },
-  created () {
-    this.questionId = this.questionaire.questions[this.questionaire.questions.length - 1].qid
   }
 }
 </script>
@@ -93,22 +65,37 @@ export default {
   display: flex;
 }
 .edit-side {
-  margin: 0 2.5%;
-  width: 20%;
+  margin: 0 0.5% 0 2.5%;
+  width: 22%;
   min-width: 200px;
-}
-.edit-side .el-menu {
   background: transparent;
 }
-.edit-side .el-menu-item {
+.side-menu {
+  width: 100%;
+}
+.side-menu ul {
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+.side-menu ul li {
+  list-style: none;
+  display: inline-block;
   width: 50%;
-  height: 40px;
-  line-height: 40px;
   text-align: center;
-  background: transparent;
+  color: #909399;
+  height: 30px;
+  line-height: 30px;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
 }
-.edit-side .el-menu--horizontal>.el-menu-item:not(.is-disabled):hover {
-  background: transparent;
+.side-menu ul li:hover {
+  background: #ffffff;
+}
+.side-menu ul li.active {
+  color: #303133;
+  border-bottom: 2px solid #409EFF;
 }
 .side-content {
   width: 100%;

@@ -7,17 +7,17 @@
       </el-carousel-item>
     </el-carousel>
     <section>
-      <p><span>{{ userNumber | formatNumber }}</span>个用户正在使用</p>
-      <el-button type="info" plain>创建新问卷</el-button>
+      <p><span>{{ userNumber }}</span>个用户正在使用</p>
+      <el-button class="new-button" type="info" plain>创建新问卷</el-button>
     </section>
   </div>
 </template>
 <script>
+import Api from '../api'
 export default {
   name: 'StartPage',
   data () {
     return {
-      userNumber: 10145267,
       slideHeight: (window.innerWidth - 8) * 640 / 1366 > 640 ? 640 : (window.innerWidth - 8) * 640 / 1366,
       slides: [
         { src: 'https://picsum.photos/1024/480/?image=52', alt: 'slide image1 slot', caption: '免费简约的问卷系统' },
@@ -26,16 +26,21 @@ export default {
       ]
     }
   },
+  computed: {
+    userNumber () {
+      return this.$store.getters.totalCount
+    }
+  },
   mounted () {
     window.onresize = () => {
       this.slideHeight = (window.innerWidth - 8) * 640 / 1366 > 640 ? 640 : (window.innerWidth - 8) * 640 / 1366
     }
-  },
-  filters: {
-    formatNumber: function (number) {
-      number = number.toString().replace(/(\d)(?=(?:\d{3})+$)/g, '$1 ')
-      return number
-    }
+    Api.getCount().then((res) => {
+      res = res.data
+      this.$store.commit('setTotalUser', {
+        count: res.count
+      })
+    })
   }
 }
 </script>
@@ -81,5 +86,8 @@ export default {
   section p span {
     font-size: 1.2rem;
     margin: 0 10px;
+  }
+  .new-button.el-button span {
+    line-height: 1;
   }
 </style>

@@ -5,12 +5,25 @@
         <i class="el-icon-document"></i>
         简易调查问卷
       </div>
-      <el-menu :default-active="'/'+$route.path.split('/')[1]" router mode="horizontal" @select="handleSelect">
-        <el-menu-item v-for="item in menu" :key="item.index" :index="item.index">{{ item.name }}</el-menu-item>
+      <el-menu :default-active="'/'+$route.path.split('/')[1]" mode="horizontal">
+        <el-menu-item v-for="item in menu" :key="item.index" :index="item.index" @click="handleSelect(item.index)">{{ item.name }}</el-menu-item>
       </el-menu>
     </div>
     <div class="content">
-      <router-view></router-view>
+      <keep-alive>
+        <router-view></router-view>
+      </keep-alive>
+      <el-dialog
+        title="提示"
+        :visible.sync="dialogVisible"
+        width="30%"
+        center>
+        <span>是否退出登录？</span>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible=false">取 消</el-button>
+          <el-button @click="handleLogout">确 定</el-button>
+        </span>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -19,18 +32,28 @@ export default {
   name: 'EnterPage',
   data () {
     return {
-      menu: [
-        { index: '/', route: '/', name: '首页' },
-        { index: '/mine', route: 'mine', name: '我的问卷' },
-        { index: '/edit', route: 'edit', name: '创建新问卷' },
-        { index: '/help', route: 'help', name: '帮助' },
-        { index: '/login', route: 'login', name: '登录' }
-      ]
+      dialogVisible: false
+    }
+  },
+  computed: {
+    menu () {
+      return this.$store.getters.menu
     }
   },
   methods: {
-    handleSelect () {
-      console.log(this.$route)
+    handleSelect (path) {
+      if (path.length) {
+        this.$router.push({ path: path })
+      } else {
+        this.dialogVisible = true
+      }
+    },
+    handleLogout () {
+      this.$store.commit('logout')
+      this.dialogVisible = false
+      if (this.$route.meta.requireAuth) {
+        this.$router.push({ path: '/login' })
+      }
     }
   }
 }
@@ -49,7 +72,7 @@ export default {
     border-radius: 30px;
     width: 98%;
     height: 60px;
-    z-index: 999;
+    z-index: 1999;
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid #eaecef;
@@ -78,5 +101,7 @@ export default {
   .content {
     position: relative;
     padding-top: 62px;
+    height: 100%;
+    box-sizing:border-box;
   }
 </style>
